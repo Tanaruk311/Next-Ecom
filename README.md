@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<!-- 1  ติดตั้ง Prisma และตั้งค่าฐานข้อมูล  -->
+npm install prisma --save-dev
+npx prisma init
 
-## Getting Started
+<!-- 2 แก้ .env -->
 
-First, run the development server:
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+NEXTAUTH_SECRET=xxx
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<!-- 3 สร้างตาราง prisma -->
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<!-- 4  ติดตั้ง prisma clinet -->
+npm install @prisma/client
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<!-- 5 สร้าง lib/prisma.ts: -->
+import { PrismaClient } from '@prisma/client'
 
-## Learn More
+export const prisma = global.prisma || new PrismaClient()
+if (process.env.NODE_ENV !== 'production') global.prisma = prisma
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<!-- 6  ติดตั้ง Next-auth  -->
+npm install next-auth @next-auth/prisma-adapter
 
-## Deploy on Vercel
+<!-- 7 สร้าง api route-->
+สร้างไฟล์ /pages/api/auth/[...nextauth].ts:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<!-- 8 เพิ่ม models สำหรับ cart & Orders -->
+model CartItem {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  userId    String
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  userId     String
+  items      Json
+  totalPrice Float
+  createdAt  DateTime @default(now())
+}
+
+
+<!-- 9  รัน migrate -->
+npx prisma migrate dev --name add-cart-order
+
+
+<!-- 10  สร้าง Pages/Components ที่จำเป็น/products — แสดงรายการสินค้า -->
+
+/cart — ตะกร้าสินค้า (local state หรือ DB)
+
+/auth/signin — ล็อกอินด้วย NextAuth
+
+/admin — จัดการสินค้า/คำสั่งซื้อ (optional)
+
+
+<!-- 11  -->
