@@ -12,31 +12,22 @@ interface ProductWithRating extends Product {
 }
 
 export default function ProductListPage() {
-  const [products, setProducts] = useState<ProductWithRating[]>([])
-  const [allProducts, setAllProducts] = useState<ProductWithRating[]>([])
-  const [loading, setLoading] = useState(true)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [withRating, setWithRating] = useState<ProductWithRating[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<ProductWithRating[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [loading, setLoading] = useState(true)
 
   const debouncedSearch = useDebounce(searchTerm, 300)
 
+  // 1. โหลดสินค้าจาก API (ไม่มี rating)
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("/api/products")
-        if (!res.ok) {
-          throw new Error("โหลดข้อมูลไม่สำเร็จ")
-        }
-
+        if (!res.ok) throw new Error("โหลดข้อมูลไม่สำเร็จ")
         const data: Product[] = await res.json()
-
-        // เพิ่ม rating หลอกเข้าไป
-        const dataWithFakeRating: ProductWithRating[] = data.map((product) => ({
-          ...product,
-          rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 - 5.0
-        }))
-
-        setProducts(dataWithFakeRating)
-        setAllProducts(dataWithFakeRating)
+        setAllProducts(data)
       } catch (err) {
         console.error("โหลดสินค้าล้มเหลว:", err)
       } finally {
@@ -47,34 +38,47 @@ export default function ProductListPage() {
     fetchProducts()
   }, [])
 
+  // 2. เพิ่ม rating ฝั่ง client เท่านั้น
+  useEffect(() => {
+    if (allProducts.length === 0) return
+    const rated = allProducts.map((product) => ({
+      ...product,
+      rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 - 5.0
+    }))
+    setWithRating(rated)
+    setFilteredProducts(rated) // ตั้งค่าเริ่มต้น
+  }, [allProducts])
+
+  // 3. ค้นหาสินค้าจาก withRating เสมอ
   useEffect(() => {
     const query = debouncedSearch.trim().toLowerCase()
-
     if (query === "") {
-      setProducts(allProducts)
+      setFilteredProducts(withRating)
     } else {
-      const filtered = allProducts.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query)
+      setFilteredProducts(
+        withRating.filter(
+          (product) =>
+            product.name.toLowerCase().includes(query) ||
+            product.description.toLowerCase().includes(query)
+        )
       )
-      setProducts(filtered)
     }
-  }, [debouncedSearch, allProducts])
+  }, [debouncedSearch, withRating])
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4">
       <h1 className="text-2xl font-bold mb-6">สินค้าทั้งหมด</h1>
       <div className="sm:w-1/2 w-full">
-        <SearchProduct value={searchTerm} onChange={(e) => setSearchTerm(e)} />
+        <SearchProduct value={searchTerm} onChange={setSearchTerm} />
       </div>
 
       {loading ? (
         <p>กำลังโหลดสินค้า...</p>
-      ) : products.length === 0 ? (
+      ) : filteredProducts.length === 0 ? (
         <p>ไม่พบสินค้าที่ค้นหา</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-5 mb-5">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border flex flex-col"
@@ -92,7 +96,7 @@ export default function ProductListPage() {
 
               <div className="flex flex-col flex-grow p-4 justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 truncate">
+                  <h3 className="text-lg font-semibold text-gray-800 truncate capitalize">
                     {product.name}
                   </h3>
                   <p className="text-sm text-gray-500 line-clamp-2 mt-1">

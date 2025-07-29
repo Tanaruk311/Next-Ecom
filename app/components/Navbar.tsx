@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import LoginDialog from "./LoginDialog"
 import CartNavbar from "../stroe/cart/CartNav"
+import { ChartNoAxesCombined } from "lucide-react"
+
+
 
 export default function Navbar() {
   const [showLogin, setShowLogin] = useState(false)
@@ -15,11 +18,12 @@ export default function Navbar() {
 
   return (
     <nav className="w-full px-6 py-4 bg-white shadow flex justify-between items-center">
-      <div className="text-xl font-bold">
-        <Link href={"/"}>
-        MyShop
-        </Link>
-        </div>
+     <div className="text-xl font-bold flex">
+  <Link href="/" className="flex items-center space-x-2">
+       <ChartNoAxesCombined className="h-6 w-6 mr-2" />
+    <span>Trendify</span>
+  </Link>
+</div>
 
       <div className="flex items-center gap-4">
         <Button variant="ghost" asChild>
