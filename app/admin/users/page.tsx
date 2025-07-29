@@ -1,9 +1,9 @@
-
+export const dynamic = "force-dynamic"
 
 import UserAddress from "../admincomponents/UserAddress"
 
 
-const userspage = () => {
+const userspage = async () => {
   return (
     <div>
       <UserAddress/>
