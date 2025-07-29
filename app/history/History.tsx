@@ -1,4 +1,5 @@
 // app/orders/history/page.tsx
+export const dynamic = "force-dynamic"
 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
 
