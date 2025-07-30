@@ -75,8 +75,8 @@ const CheckoutPage = () => {
                   <Image
                     src={item.image}
                     alt={item.name}
-                    width={16}
-                    height={16}
+                    width={80}
+                    height={80}
                     className=" object-cover rounded"
                   />
                 </td>

@@ -72,12 +72,12 @@ const Checkout = () => {
                 key={item.id}
                 className="flex items-center justify-between border-b pb-4 mt-2"
               >
-                <div className="flex gap-4">
+                <div className="flex gap-4 w-full">
+                 
                   <Image
                     src={item.image}
                     alt={item.name}
-                    width={80}
-                    height={80}
+                    fill
                     className="rounded-md object-cover shadow-md"
                   />
                   <div className="flex flex-col gap-0.5 ">
