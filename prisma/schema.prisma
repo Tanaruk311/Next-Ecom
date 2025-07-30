@@ -5,70 +5,63 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Product {
   id            String      @id @default(cuid())
   name          String
   price         Float
-  image         String
   description   String
   createdAt     DateTime    @default(now())
+  image         String
   imagePublicId String?
-  cartItems       CartItem[]
-  orderItems    OrderItem[] // ✅ เชื่อมกับ OrderItem
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
 }
 
 model CartItem {
   id        String  @id @default(cuid())
-  product   Product @relation(fields: [productId], references: [id])
   productId String
   quantity  Int
   userId    String
+  product   Product @relation(fields: [productId], references: [id])
 }
-
-
 
 model Order {
-  id         String   @id @default(cuid())
+  id         String      @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
   totalPrice Float
-  createdAt  DateTime @default(now())
+  createdAt  DateTime    @default(now())
   addressId  String?
-  address    Address?  @relation("AddressToOrder", fields: [addressId], references: [id])
-  status String @default("กำลังดำเนินการ")
-
-
-  items OrderItem[] // ✅ ความสัมพันธ์กับรายการสินค้า
+  status     String      @default("กำลังดำเนินการ")
+  address    Address?    @relation("AddressToOrder", fields: [addressId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  items      OrderItem[]
 }
-
-
-
 
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Float // ราคาตอนสั่งซื้อ
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model User {
-  id       String  @id @default(cuid())
-  password String?
-
+  id            String    @id @default(cuid())
+  password      String?
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  accounts      Account[]
-  sessions      Session[]
   role          String    @default("user")
+  accounts      Account[]
   addresses     Address[]
   orders        Order[]
+  sessions      Session[]
 }
 
 model Account {
@@ -106,17 +99,16 @@ model VerificationToken {
 }
 
 model Address {
-  id        String   @id @default(cuid())
-  userId    String
-  fullName  String
-  phone     String
-  address   String
-  district  String
+  id          String   @id @default(cuid())
+  userId      String
+  fullName    String
+  phone       String
+  address     String
+  district    String
+  province    String
+  zip         String
+  createdAt   DateTime @default(now())
   subdistrict String
-  province  String
-  zip       String
-  createdAt DateTime @default(now())
-  orders    Order[]  @relation("AddressToOrder")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders      Order[]  @relation("AddressToOrder")
 }

@@ -49,13 +49,13 @@ export const authOptions = {
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       // เพิ่ม property role และ id ใน session.user (cast เป็น any เพื่อป้องกัน error typescript)
-      session.user.role = token.role;
+      session.user.role = token.role.toString().trim();
       session.user.id = token.id;
       return session
     },
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.role = user.role
+        token.role = user.role.toString().trim();
         token.id = user.id
       }
       return token

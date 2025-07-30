@@ -6,6 +6,7 @@ export default withAuth(
       const token = req.nextauth.token
       
     console.log("Middleware token:", token)
+
     if (token?.role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url))
     }
